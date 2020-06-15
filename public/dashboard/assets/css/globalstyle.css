@@ -1,0 +1,24 @@
+
+.navbar-nav>.language-menu>.dropdown-menu{
+    width: 150px !important;
+    height: 55px !important;
+}
+.mr-bottom-10{
+    margin-bottom: 10px !important;
+}
+.notify-alert {
+    z-index: 2000!important;
+    top: 8%!important;
+}
+.nav-tabs-custom{
+    margin-top: -20px;
+}
+.has-feedback .form-control{
+    padding-right: unset;
+}
+.form-control{
+    text-align: right;
+}
+.login-icon{
+    right: unset;
+}

@@ -1,0 +1,333 @@
+@extends('dashboard.layouts.app')
+
+@section('content')
+
+
+    @push('scripts')
+
+        <script src="{{asset('dashboard/assets/ckeditor/ckeditor.js')}}"></script>
+        <script src="{{asset('dashboard/assets/js/select2.js')}}"></script>
+
+        <script>
+            // CKEDITOR.replace( 'editor' );
+            // config.extraPlugins = 'bidi';
+            // CKEDITOR.editorConfig = function( config ) {
+            //     config.language = 'ar';
+            //     config.uiColor = '#F7B42C';
+            //     config.height = 300;
+            //     config.toolbarCanCollapse = true;
+            // };
+            CKEDITOR.replace('editor1', {
+                contentsLangDirection: "rtl",
+                extraPlugins:'bidi',
+                extraPlugins : 'imageuploader',
+                filebrowserUploadUrl:'{{route('articles.upload')}}',
+                filebrowserBrowseUrl:'{{asset('/storage/articles')}}',
+                language:'ar',
+                uiColor: '#F7B42C',
+                height:300,
+                toolbarCollapse:true,
+
+            });
+            $(".js-example-tokenizer").select2({
+                tags: true,
+                tokenSeparators: [',', ' ']
+            });
+            <script >
+                // initialize ckeditor
+                CKEDITOR.replace('body');
+
+                // Javascript function to copy image url to clipboard from modal
+                function copyUrl() {
+                    var copyText = document.getElementById("post_image_url");
+                    copyText.select();
+                    document.execCommand("Copy");
+
+                    // replace url with confirm message
+                    $('#post_image_url').hide(1000);
+                    $('#feedback_msg').show();
+
+                    // hide modal after 2 seconds
+                    setTimeout(function(){
+                        $('#myModal').modal('hide');
+                        $('#feedback_msg').hide();
+                        $('#post_image_url').show();
+                    }, 2000);
+                }
+
+                $(document).ready(function(){
+                    // When user clicks the 'upload image' button
+                    $('.upload-img-btn').on('click', function(){
+
+                        // Add click event on the image upload input
+                        // field when button is clicked
+                        $('#image-input').click();
+
+
+                        $(document).on('change', '#image-input', function(e){
+
+                            // Get the selected image and all its properties
+                            var image_file = document.getElementById('image-input').files[0];
+
+                            // Initialize the image name
+                            var image_name = image_file.name;
+
+
+                            // determine the image extension and validate image
+                            var image_extension = image_name.split('.').pop().toLowerCase();
+                            if (jQuery.inArray(image_extension, ['gif', 'png', 'jpg', 'jpeg']) == -1) {
+                                alert('That image type is not supported');
+                                return;
+                            }
+
+                            // Get the image size. Validate size
+                            var image_size = image_file.size;
+                            if (image_size > 3000000) {
+                                alert('The image size is too big');
+                                return;
+                            }
+
+
+                            // Compile form values from the form to send to the server
+                            // In this case, we are taking the image file which
+                            // has key 'post_image' and value 'image_file'
+                            var form_data = new FormData();
+                            form_data.append('post_image', image_file);
+                            form_data.append('uploading_file', 1);
+                            form_data.append('_token','{{csrf_token()}}');
+
+                            // upload image to the server in an ajax call (without reloading the page)
+                            $.ajax({
+                                url: '{{route('articles.upload')}}',
+                                method: 'POST',
+                                data: form_data,
+                                contentType: false,
+                                cache: false,
+                                processData: false,
+                                beforeSend : function(){
+
+                                },
+                                success : function(data){
+                                    console.log(data);
+                                    // how the pop up modal
+                                    $('#myModal').modal('show');
+
+                                    // the server returns a URL of the uploaded image
+                                    // show the URL on the popup modal
+                                    $('#post_image_url').val(data);
+                                }  ,
+                                error:function (data) {
+                                    console.log(data);
+                                }
+                            });
+                        });
+
+                    });
+                });
+            </script>
+
+        </script>
+        @endpush
+    <!-- Content Wrapper. Contains page content -->
+    <div class="content-wrapper">
+        <!-- Contentlo Header (Page header) -->
+        <section class="content-header">
+            <h1>
+                ادارة المقالات
+                <small></small>
+            </h1>
+            <ol class="breadcrumb">
+                <li><a href="{{route('dashboard')}}"><i class="fa fa-dashboard"></i> لوحة التحكم</a></li>
+                <li><a href="{{route('articles.index')}}">المقالات</a></li>
+                <li class="active">اضافة مقاله جديده</li>
+            </ol>
+        </section>
+        <!--Main Content-->
+        <section class="content">
+            <div class="row">
+
+                <div class="col-md-9">
+                    @include('dashboard.layouts.includes.errors')
+                    <div class="box box-info">
+                        <div class="box-header">
+                            <h3 class="box-title">اضافة مقاله جديده
+                                <small></small>
+                            </h3>
+                            <!-- tools box -->
+                            <div class="pull-right box-tools">
+                                <button type="button" class="btn btn-info btn-sm" data-widget="collapse" data-toggle="tooltip"
+                                        title="Collapse">
+                                    <i class="fa fa-minus"></i></button>
+{{--                                <button type="button" class="btn btn-info btn-sm" data-widget="remove" data-toggle="tooltip"--}}
+{{--                                        title="Remove">--}}
+{{--                                    <i class="fa fa-times"></i></button>--}}
+                            </div>
+                            <!-- /. tools -->
+                        </div>
+                        <!-- /.box-header -->
+
+                        <div class="box-body pad">
+                            <form action="{{route('articles.store')}}" method="post" enctype="multipart/form-data">
+                                @csrf
+                                <div class="form-group">
+                                    <label for="title">العنوان الرئيسي</label>
+                                    <input class="form-control" name="title" placeholder="ادخل العنوان الرئيسي"  id="title"  value="{{old('title')}}">
+                                </div>
+                                <div class="form-group">
+                                    <label for="subtitle">العنوان الفرعى</label>
+                                    <input class="form-control" name="subtitle" placeholder="ادخل العنوان الفرعى"  id="subtitle"  value="{{old('subtitle')}}">
+                                </div>
+                                <div class="form-group">
+                                    <a href="#" class="btn btn-xs btn-default pull-right upload-img-btn" data-toggle="modal" data-target="#myModal">upload image</a>
+
+                                    <!-- Input to browse your machine and select image to upload -->
+                                    <input type="file" id="image-input" style="display: block;">
+                                    <label for="description">الوصف</label>
+                                    <textarea name="editor1" id="editor1" rows="10" cols="80"></textarea>
+{{--                                    <textarea class="form-control" name="description" rows="5" placeholder="ادخل الوصف">{!! old('description') !!}</textarea>--}}
+                                </div>
+                                <div class="form-group">
+                                    <label for="tags">اختر الجريده</label>
+                                    <select class="form-control" name="newspaper_id"  style="height: 40px;">
+                                        <option selected disabled>اختر الجريده</option>
+                                        @foreach($newspapers as $news)
+                                            <option value="{{$news->id}}" @if(old('newspaper_id')==$news->id) selected @endif>
+                                                {{$news->name}}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="tags">اختر القسم</label>
+                                    <select class="form-control" name="newspaper_id"  style="height: 40px;" disabled="" id="departments">
+                                        <option selected disabled>اختر القسم</option>
+                                    </select>
+                                </div>
+                                <!-- /.form group -->
+                                <div class="form-group">
+                                    <label for="tags">Tags</label>
+                                    <select class="form-control js-example-tokenizer" id="tags" multiple name="tags[]">
+
+                                        @foreach ($tags as $tag)
+                                            <option value="{{$tag->id}}" @if(in_array($tag->id,(array)old('tags'))) selected @endif>
+                                                {{$tag->name}}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <textarea id="editor" name="content" rows="10" cols="80" placeholder="Enter Your Post Here">{!! old('content') !!}</textarea>
+                                <div class="form-group" style="margin-top: 10px">
+                                    <div class="btn btn-warning btn-file">
+                                        <i class="fa fa-paperclip"></i> Attachment
+                                        <input type="file" name="image">
+                                    </div>
+
+                                </div>
+                                <div class="box-footer">
+                                    <div class="pull-right">
+                                        <button type="submit" class="btn btn-success"><i class="fa fa-paper-plane"></i> Publish</button>
+
+                                        <label class="switch">
+                                            <input type="checkbox" name="status">
+                                            <span class="slider round"></span>
+                                        </label>
+                                    </div>
+                                    <button type="reset" class="btn btn-danger"><i class="fa fa-times"></i> Discard</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <!-- /. box -->
+                </div>
+                <!-- /.col -->
+                <div class="col-md-3">
+                      <a href="{{route('articles.index')}}" class="btn btn-primary btn-block margin-bottom">عرض كل المقالات</a>
+                    <div class="box box-solid">
+                        <div class="box-header with-border">
+                            <h3 class="box-title">الجرائد</h3>
+
+                            <div class="box-tools">
+                                <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="box-body no-padding" style="">
+                            <ul class="nav nav-pills nav-stacked">
+                                    @foreach($newspapers as $newspaper)
+                                        <li>
+{{--                                            <a href="{{route('newspapers.show',$newspaper->id)}}"><i class="fa fa-bars"></i>--}}
+                                            <a href="#"><i class="fa fa-bars"></i>
+                                                {{$newspaper->name}}
+                                                <span class="label label-primary pull-left">{{$newspaper->departments->count()}}</span>
+                                            </a>
+                                        </li>
+                                    @endforeach
+                            </ul>
+                        </div>
+                        <!-- /.box-body -->
+                    </div>
+                    <!-- /. box -->
+                    <div class="box box-solid">
+                        <div class="box-header with-border">
+                            <h3 class="box-title">الكلمات المفتاحية</h3>
+
+                            <div class="box-tools">
+                                <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <!-- /.box-header -->
+                        <div class="box-body no-padding" style="">
+                            <ul class="nav nav-pills nav-stacked">
+                                @foreach($tags as $tag)
+                                    <li>
+                                        <a href="{{route('tags.show',$tag->id)}}"><i class="fa fa-tags"></i> {{$tag->name}}
+                                            <span class="label label-warning pull-left">
+                                                {{$tag->articles->count()}}
+                                            </span>
+                                        </a>
+                                    </li>
+                                @endforeach
+                            </ul>
+                        </div>
+                        <!-- /.box-body -->
+                    </div>
+                    <!-- /.box -->
+                </div>
+                <!-- /.col -->
+            </div>
+            <!-- /.row -->
+        </section>
+        <!-- /.content -->
+    </div>
+
+@endsection
+
+
+   <a href="#" class="btn btn-xs btn-default pull-right upload-img-btn" data-toggle="modal" data-target="#myModal">upload image</a>
+                    <input type="file" id="image-input" style="display: none;">
+
+<!-- Pop-up Modal to display image URL -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">Click below to copy image url</h4>
+            </div>
+            <div class="modal-body">
+                <!-- returned image url will be displayed here -->
+                <input
+                    type="text"
+                    id="post_image_url"
+                    onclick="return copyUrl()"
+                    class="form-control"
+                >
+                <p id="feedback_msg" style="color: green; display: none;"><b>Image url copied to clipboard</b></p>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+

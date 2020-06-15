@@ -1,0 +1,94 @@
+.content-wrapper, .right-side, .main-footer{
+    margin-left: 230px !important;
+    margin-right: unset;
+}
+.main-sidebar, .left-side{
+    right: unset;
+}
+.main-header{
+    position: relative;
+    max-height: 100px;
+    z-index: 1030;
+}
+.main-header .logo{
+    float: left;
+}
+.main-header .sidebar-toggle{
+    float: left;
+}
+.main-header>.navbar{
+
+    transition: margin-left .3s ease-in-out;
+    margin-bottom: 0;
+    margin-left: 230px;
+    border: none;
+    min-height: 50px;
+    border-radius: 0;
+    margin-right: 0px;
+}
+.main-header .navbar-custom-menu, .main-header .navbar-right{
+    float: right;
+}
+.control-sidebar-bg, .control-sidebar{
+    right: -230px !important;
+    left: unset;
+    transition: right .5s ease-in-out;
+}
+.control-sidebar.control-sidebar-open, .control-sidebar.control-sidebar-open+.control-sidebar-bg{
+    right: 0px !important;
+    left:unset;
+    transition: right .5s ease-in-out;
+
+}
+.content-header>.breadcrumb{
+    left: unset;
+    right: 15px;
+}
+.small-box .icon{
+    left: unset;
+    right: 10px;
+}
+.pull-right{
+    float: left !important;
+}
+.user-panel>.info {
+    right: 30px;
+}
+.user-panel>.info>a{
+    padding-right: 50px;
+}
+.navbar-custom-menu>.navbar-nav>li>.dropdown-menu{
+    left: auto;
+    right: 0;
+}
+.box-header>.box-tools{
+    left: unset;
+    right: 10px;
+}
+.pull-left{
+    float: left !important;
+}
+.pull-right-en{
+    float: right !important;
+}
+
+.margin-50{
+    margin-left: 50px !important;
+    margin-right: 0px !important;
+}
+
+
+.nav-tabs-custom>.nav-tabs.pull-right,.nav-tabs-custom>.nav-tabs.pull-right{
+    float:none;
+}
+
+
+
+
+
+
+
+
+
+
+
